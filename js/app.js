@@ -1,12 +1,11 @@
 
 const inquirer = require("inquirer");
-const database = require("database");
+const database = require("../db/database");
+const cTable = require("console.table");
 
 
-(async () => {
-    await promptUser();
-})
-promptUser = async () => {
+
+const promptUser = async () => {
     var answers = await inquirer.prompt([
         {
             name: "init",
@@ -14,75 +13,90 @@ promptUser = async () => {
             message: "What would you like to do?",
             choices: ["View all Employees", "View Employees by department", "View Employees by role", "Add Employee", "Remove Employee"]
         }]);
-    database.connect(results);
-
-    switch (promptUser.answers) {
+    let db = new database();
+    db.connect();
+    switch (answers.init) {
         case "View all Employees":
 
-            var results = await database.getEmployees();
+            var results = await db.getEmployees();
+            // install . map npm
             console.table(results)
+            console.log("all employees are being shown")
+            isThatAll();
             break;
 
         case "View Employees by department":
 
-            var results = await database.getDepts();
-
+            var results = await db.getDepts();
             inquirer.prompt([
                 {
                     name: "department",
                     type: "list",
-                    choices: [results]
+                    choices: results
                 }
-            ]).then((answers) => {
-                if (answers === HR) {
-                    // query all employees from HR
-                    promptUser();
+            ]).then(async (answers) => {
+                if (answers.department === "HR") {
+                    let results = await db.getEmployeesByDept("HR")
+                    console.table(results);
+                    isThatAll();
                 }
-                if (answers === eng) {
-                    // query all employees from engineering
-                    promptUser();
+                if (answers.department === "eng") {
+                    let results = await db.getEmployeesByDept("eng")
+                    console.table(results);
+                    isThatAll();
                 }
-                if (answers === mgr) {
-                    // select all employees from management
-                    promptUser();
+                if (answers.department === "mgr") {
+                    let results = await db.getEmployeesByDept("mgr")
+                    console.table(results);
+                    isThatAll();
                 }
-            }
+            });
+            break;
 
         // next ====================================================================================
         case "View Employees by role":
 
-            var results = db.query("SELECT * FROM 'role'")
-
+            let roles = await db.getRoles();
+            const titleList = roles.map(r => {
+                return r.title;
+            });
+            console.log(titleList);
             inquirer.prompt([
                 {
                     name: "roles",
                     type: "list",
-                    choices: [results]
+                    choices: titleList
                 }
-            ]).then((answers) => {
-                if (answers.choices === "HR coordinator") {
-                    // query all employees with title HR coordinator
-                    promptUser();
+            ]).then(async (answers) => {
+                if (answers.roles === "HR coordinator") {
+                   let results = await db.getEmployeesByRoles("HR coordinator")
+                    console.table(results)
+                    isThatAll();
                 }
-                if (answers.choices === "CEO") {
-                    // query all employees with title CEO
-                    promptUser();
+                if (answers.roles === "CEO") {
+                    let results = await db.getEmployeesByRoles("CEO")
+                    console.table(results)
+                    isThatAll();
                 }
-                if (answers.choices === "Engineer") {
-                    // select all employees with title Enigneer
-                    promptUser();
+                if (answers.roles === "Engineer") {
+                    let results = await db.getEmployeesByRoles("Engineer")
+                    console.table(results)
+                    isThatAll();
                 }
-                if (answers.choices === "Tester") {
-                    // select all employees with title Tester
-                    promptUser();
+                if (answers.roles === "Tester") {
+                    let results = await db.getEmployeesByRoles("Tester")
+                    console.table(results)
+                    isThatAll();
                 }
-                if (answers.choices === "Dev lead") {
-                    // select all employees with title Dev lead
-                    promptUser();
-                } 
-                if (answers.choices === "Senior Dev") {
-                    // select all employees with title Senior Dev
-                    promptUser();
+                if (answers.roles === "Dev lead") {
+                    let results = await db.getEmployeesByRoles("Dev lead")
+                    console.table(results)
+                    isThatAll();
+                }
+                if (answers.roles === "Senior Dev") {
+                    let results = await db.getEmployeesByRoles("Senior Dev")
+                    console.table(results)
+                    isThatAll();
                 }
             });
             break;
@@ -90,6 +104,10 @@ promptUser = async () => {
         // next =============================================================================================
         case "Add Employee":
 
+            let mgr = await db.getEmployeesByDept("mgr");
+            const mgrList = mgr.map(m=> {
+                return (m.first_name,m.last_name,m.id);
+            });
 
             inquirer.prompt([
                 {
@@ -109,16 +127,33 @@ promptUser = async () => {
                     type: "list",
                     message: "Employees role id. 1 = HR, 2 = eng, 3 = mgr",
                     choices: ["1", "2", "3"]
+                },
+
+                {
+                    name: "manager",
+                    type: "list",
+                    message: "Employees manager",
+                    choices: mgrList
                 }
-            ]).then((answers) => {
-                let first_name = answers.firstName;
-                let last_name = answers.lastName;
-                let role_id = answers.role;
+            ]).then(async (answers) => {
+                var emp = 
+                {
+                    first_name: answers.first_name,
+                    last_name_name: answers.last_name,
+                    role: answers.role,
+                    manager: answers.manager,
+                }
+
+               let result = await db.saveEmployee(emp);
+                // let first_name = answers.firstName;
+                // let last_name = answers.lastName;
+                // let role_id = answers.role;
                 // db.query("INSERT INTO employees" + first_name + last_name + role_id);
-                console.log("this is a table");
+                console.table(result);
+                isThatAll();
             });
             break;
-//  next ============================================================================================
+        //  next ============================================================================================
         case "Remove Employee":
 
             inquirer.prompt([
@@ -129,12 +164,37 @@ promptUser = async () => {
                 },
 
             ]).then((answers) => {
-                let last_name = answers.lastName;
+                // let last_name = answers.lastName;
                 // db.query("select all employees" + last_name);
                 // remove from db
-                console.log("this is a table");
+                console.log("this employee is mising");
+                isThatAll();
             });
     }
 }
 
+function isThatAll() {
+    inquirer.prompt([
+        {
+            name: "lastPrompt",
+            type: "list",
+            message: "Is that all?",
+            choices: ["yes", "no"]
+        }
+
+    ]).then((answers) => {
+        if (answers.lastPrompt === "yes") {
+            console.log("All done!")
+        }
+        if (answers.lastPrompt === "no") {
+            promptUser();
+        }
+    });
+}
+
+
+
+(async () => {
+    await promptUser();
+})()
 
