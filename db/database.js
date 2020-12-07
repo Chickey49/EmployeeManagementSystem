@@ -42,6 +42,27 @@ class Database {
 
     }
 
+    deleteEmployee(name) {
+        var dbquery = "delete from employees where last_name =?";
+        return new Promise(data => {
+            this.db.query(dbquery, [name], function (error, result) {
+                if (error) {
+                    console.log(error);
+                    throw error;
+                }
+                try {
+
+                    data(result);
+
+                } catch (error) {
+                    data({});
+                    throw error;
+                }
+
+            });
+        });
+    }
+
     getEmployeesByDept(name) {
         var dbquery =
             `SELECT e.*, r.title, d.name as DeptName

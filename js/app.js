@@ -105,10 +105,10 @@ const promptUser = async () => {
         case "Add Employee":
 
             let mgrDept = await db.getManagers();
-            let mgrList = mgrDept.map(m  => {
+            let mgrList = mgrDept.map(m => {
                 return m.id + "-" + m.first_name + " " + m.last_name;
             });
-            let mgrIdList = mgrDept.map(m  => {
+            let mgrIdList = mgrDept.map(m => {
                 return m.id;
             });
 
@@ -147,10 +147,8 @@ const promptUser = async () => {
                     manager: answers.manager,
                 }
 
-                const r = await db.saveEmployee(emp);
-                const result = r.map(e => {
-                     (e.id, e.first_name, e.last_name, e.manager);
-                });
+                await db.saveEmployee(emp);
+                const result = await db.getEmployees();
                 console.table(result);
                 isThatAll();
             });
@@ -165,11 +163,13 @@ const promptUser = async () => {
                     message: "Employees last name"
                 },
 
-            ]).then((answers) => {
-                // let last_name = answers.lastName;
-                // db.query("select all employees" + last_name);
-                // remove from db
-                console.log("this employee is mising");
+            ]).then(async (answers) => {
+                let name =
+                {
+                    last_name: answers.lastName
+                }
+                let result = await db.deleteEmployee(name);
+                console.log(result);
                 isThatAll();
             });
     }
