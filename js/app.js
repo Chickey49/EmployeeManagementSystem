@@ -69,7 +69,7 @@ const promptUser = async () => {
                 }
             ]).then(async (answers) => {
                 if (answers.roles === "HR coordinator") {
-                   let results = await db.getEmployeesByRoles("HR coordinator")
+                    let results = await db.getEmployeesByRoles("HR coordinator")
                     console.table(results)
                     isThatAll();
                 }
@@ -104,9 +104,12 @@ const promptUser = async () => {
         // next =============================================================================================
         case "Add Employee":
 
-            let mgr = await db.getEmployeesByDept("mgr");
-            const mgrList = mgr.map(m=> {
-                return (m.first_name,m.last_name,m.id);
+            let mgrDept = await db.getManagers();
+            let mgrList = mgrDept.map(m  => {
+                return m.id + "-" + m.first_name + " " + m.last_name;
+            });
+            let mgrIdList = mgrDept.map(m  => {
+                return m.id;
             });
 
             inquirer.prompt([
@@ -132,23 +135,22 @@ const promptUser = async () => {
                 {
                     name: "manager",
                     type: "list",
-                    message: "Employees manager",
-                    choices: mgrList
+                    message: "Employees manager: " + mgrList.join(", "),
+                    choices: mgrIdList
                 }
             ]).then(async (answers) => {
-                var emp = 
+                var emp =
                 {
-                    first_name: answers.first_name,
-                    last_name_name: answers.last_name,
-                    role: answers.role,
+                    first_name: answers.firstName,
+                    last_name: answers.lastName,
+                    roles_id: answers.role,
                     manager: answers.manager,
                 }
 
-               let result = await db.saveEmployee(emp);
-                // let first_name = answers.firstName;
-                // let last_name = answers.lastName;
-                // let role_id = answers.role;
-                // db.query("INSERT INTO employees" + first_name + last_name + role_id);
+                const r = await db.saveEmployee(emp);
+                const result = r.map(e => {
+                     (e.id, e.first_name, e.last_name, e.manager);
+                });
                 console.table(result);
                 isThatAll();
             });

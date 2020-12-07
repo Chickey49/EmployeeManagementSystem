@@ -141,25 +141,69 @@ class Database {
     saveEmployee(emp) {
         // insert statement 
         let dbquery =
-         `INSERT INTO employees
-        (id,first_name, last_name, roles_id, manager_id)
+            `INSERT INTO employees
+        (first_name, last_name, roles_id, manager_id)
         VALUES
-        (?,?,?,?,?);`;
-        return this.db.query(dbquery, [emp.first_name, emp.last_name, emp.roles_id, emp.manager], function (error, result) {
-            if (error) {
-                console.log(error);
-                throw error;
-            }
-            try {
+        (?,?,?,?);`;
+        return new Promise(data => {
+            this.db.query(dbquery, [emp.first_name, emp.last_name, emp.roles_id, emp.manager], function (error, result) {
+                if (error) {
+                    console.log(error);
+                    throw error;
+                }
+                try {
 
-                data(result);
+                    data(result);
 
-            } catch (error) {
-                data({});
-                throw error;
-            }
+                } catch (error) {
+                    data({});
+                    throw error;
+                }
 
+            });
         });
-    };
+    }
+    getDepartment(id) {
+        let dbquery = "SELECT * FROM departments WHERE id=?";
+        return new Promise(data => {
+            this.db.query(dbquery, [id], function (error, result) {
+                if (error) {
+                    console.log(error);
+                    throw error;
+                }
+                try {
+
+                    data(result);
+
+                } catch (error) {
+                    data({});
+                    throw error;
+                }
+
+            });
+        });
+    }
+    getManagers(){
+        let dbquery = "select e.* from employees e where e.id in (select distinct manager_id from employees)";
+        return new Promise(data => {
+            this.db.query(dbquery, function (error, result) {
+                if (error) {
+                    console.log(error);
+                    throw error;
+                }
+                try {
+
+                    data(result);
+
+                } catch (error) {
+                    data({});
+                    throw error;
+                }
+
+            });
+        });
+
+    }
 }
+
 module.exports = Database;
