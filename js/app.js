@@ -21,7 +21,6 @@ const promptUser = async () => {
             var results = await db.getEmployees();
             // install . map npm
             console.table(results)
-            console.log("all employees are being shown")
             isThatAll();
             break;
 
@@ -59,8 +58,7 @@ const promptUser = async () => {
             let roles = await db.getRoles();
             const titleList = roles.map(r => {
                 return r.title;
-            });
-            console.log(titleList);
+            })
             inquirer.prompt([
                 {
                     name: "roles",
