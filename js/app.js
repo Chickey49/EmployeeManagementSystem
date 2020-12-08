@@ -155,44 +155,50 @@ const promptUser = async () => {
             break;
         //  next ============================================================================================
         case "Remove Employee":
-
+            currentEmployees = await db.getEmployees();
+            console.table(currentEmployees);
             inquirer.prompt([
                 {
-                    name: "lastName",
+                    name: "id",
                     type: "input",
-                    message: "Employees last name"
+                    message: "Employees id to delete"
                 },
-
+                
             ]).then(async (answers) => {
-                let name =
-                {
-                    last_name: answers.lastName
+                try {
+                    // try to delete employee
+                    await db.deleteEmployee(answers.id);
+                } catch (error) {
+                    // if the user is a manager that still has employees, let user know
+                    if (error.message.contains("manager")) {
+                        console.log(error.message)
+                    }
                 }
-                let result = await db.deleteEmployee(name);
-                console.log(result);
+                const newEmpList = await db.getEmployees();
+                console.table(newEmpList);
                 isThatAll();
             });
     }
 }
 
-function isThatAll() {
-    inquirer.prompt([
-        {
-            name: "lastPrompt",
-            type: "list",
-            message: "Is that all?",
-            choices: ["yes", "no"]
-        }
+        function isThatAll() {
+            inquirer.prompt([
+                {
+                    name: "lastPrompt",
+                    type: "list",
+                    message: "Is that all?",
+                    choices: ["yes", "no"]
+                }
 
-    ]).then((answers) => {
-        if (answers.lastPrompt === "yes") {
-            console.log("All done!")
+            ]).then((answers) => {
+                if (answers.lastPrompt === "yes") {
+                    console.log("All done!")
+                }
+                if (answers.lastPrompt === "no") {
+                    promptUser();
+                }
+            });
         }
-        if (answers.lastPrompt === "no") {
-            promptUser();
-        }
-    });
-}
 
 
 
