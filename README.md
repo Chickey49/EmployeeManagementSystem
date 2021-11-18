@@ -8,7 +8,7 @@ https://drive.google.com/file/d/1KU5w-w8FvPmxPcWIhrsp1vTMN0sAS5Uc/view?usp=shari
 ## About the Project  
 A solution for managing a company's employees using node, inquirer, and MySQL.
 ## Usage  
-To use, open the command line, navigate to the directory, npm i, then run node app.js.   
+To use, open the command line, navigate to the directory, npm i, then run node js/app.js.   
 ## Installation  
 To install please clone the repo using the link below.  
 ## License

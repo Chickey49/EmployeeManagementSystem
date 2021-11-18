@@ -101,7 +101,7 @@ class Database {
          INNER JOIN roles r ON e.roles_id = r.id
          INNER JOIN departments d ON r.department_id = d.id 
          where d.name = ?`;
-
+ 
         return this.executeSqlWithParams(dbquery, [name]);
     }
 
